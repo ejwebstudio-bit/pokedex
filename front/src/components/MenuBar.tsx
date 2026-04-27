@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { Home, Settings, User } from 'lucide-react';
+import { Home, LayoutDashboard, Settings, User } from 'lucide-react';
 
 // --- MenuBar Component ---
 
@@ -21,6 +21,13 @@ const menuItems: MenuItem[] = [
     href: "/",
     gradient: "radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(37,99,235,0.06) 50%, rgba(29,78,216,0) 100%)",
     iconColor: "group-hover:text-blue-500 dark:group-hover:text-blue-400",
+  },
+  {
+    icon: <LayoutDashboard className="h-5 w-5" />,
+    label: "Dashboard",
+    href: "/dashboard",
+    gradient: "radial-gradient(circle, rgba(168,85,247,0.15) 0%, rgba(147,51,234,0.06) 50%, rgba(126,34,206,0) 100%)",
+    iconColor: "group-hover:text-purple-500 dark:group-hover:text-purple-400",
   },
   {
     icon: <Settings className="h-5 w-5" />,
