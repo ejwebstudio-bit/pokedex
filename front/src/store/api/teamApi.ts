@@ -9,6 +9,8 @@ export interface Team {
   name: string;
   description: string;
   pokemons: Pokemon[];
+  level?: number;
+  totalStats?: number;
 }
 
 export interface CreateTeamForm {

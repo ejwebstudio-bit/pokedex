@@ -3,11 +3,31 @@ import React from 'react';
 import Modal from "../components/ui/modal";
 import { useState } from 'react';
 import OrbitCarousel from '@/components/ui/orbit-carousel';
-import { Trash } from "lucide-react";
+import { Trash, Shield, Star } from "lucide-react";
 import { useCreateOneTeamMutation, useDeleteOneTeamMutation, useGetAllTeamsQuery, useRemovePokemonToTeamMutation } from "@/store/api/teamApi";
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { Team } from "@/store/api/teamApi";
 import { Button } from '@/components/ui/button';
+
+// Max level threshold (500+ total stats = level 5++)
+const MAX_LEVEL = 5;
+const MAX_TOTAL_STATS = 500;
+
+// Helper to get progress bar color based on level
+function getProgressColor(level: number): string {
+  if (level >= 4) return 'bg-green-500';
+  if (level >= 2) return 'bg-yellow-500';
+  return 'bg-red-500';
+}
+
+// Helper to get level label
+function getLevelLabel(level: number): string {
+  if (level >= 5) return 'Légendaire';
+  if (level >= 4) return 'Élite';
+  if (level >= 3) return 'Expert';
+  if (level >= 2) return 'Intermédiaire';
+  return 'Débutant';
+}
 
 
 
@@ -18,11 +38,37 @@ export interface TeamMemberCardProps {
 }
 
 //Sub-component for rendering a single team member's card
-const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ team, onClick }) => (
-  <div onClick={onClick} className="flex shadow-xl border-2 rounded-md flex-col items-center text-center justify-center">
-    <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">{team.name}</h3>
-  </div>
-);
+const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ team, onClick }) => {
+  const level = team.level ?? 1;
+  const progressPercent = Math.min(((team.totalStats ?? 0) / MAX_TOTAL_STATS) * 100, 100);
+  const progressColor = getProgressColor(level);
+  const levelLabel = getLevelLabel(level);
+
+  return (
+    <div onClick={onClick} className="flex shadow-xl border-2 rounded-md flex-col items-center text-center justify-center p-4 cursor-pointer hover:shadow-2xl transition-shadow">
+      <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">{team.name}</h3>
+      {/* Level badge */}
+      <div className="flex items-center gap-1 mt-2">
+        <Shield className="w-4 h-4 text-blue-500" />
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Niveau {level} — {levelLabel}
+        </span>
+      </div>
+      {/* Progress bar */}
+      <div className="w-full mt-2 px-4">
+        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+          <div
+            className={`h-2.5 rounded-full transition-all duration-300 ${progressColor}`}
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+        <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          {team.totalStats ?? 0} / {MAX_TOTAL_STATS} pts
+        </span>
+      </div>
+    </div>
+  );
+};
 
 // Main component that renders the entire section
 const Teams: React.FC = () => {
@@ -123,6 +169,30 @@ const Teams: React.FC = () => {
               >
                 <h1 className='text-center'>{selectedTeam?.description}</h1>
                 
+                {/* Level & stats détaillés dans la modale */}
+                {selectedTeam && (
+                  <div className="my-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Shield className="w-5 h-5 text-blue-500" />
+                      <span className="font-semibold text-lg">
+                        Niveau {selectedTeam.level ?? 1} — {getLevelLabel(selectedTeam.level ?? 1)}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-700 mb-2">
+                      <div
+                        className={`h-3 rounded-full transition-all duration-300 ${getProgressColor(selectedTeam.level ?? 1)}`}
+                        style={{ width: `${Math.min(((selectedTeam.totalStats ?? 0) / MAX_TOTAL_STATS) * 100, 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Stats totales : <strong>{selectedTeam.totalStats ?? 0}</strong> / {MAX_TOTAL_STATS} pts
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Prochain niveau à {((selectedTeam.level ?? 1) * 100)} pts
+                    </p>
+                  </div>
+                )}
+
                 <Button onClick={() => handleDeleteTeam(selectedTeam?.id)}><Trash/></Button>
                 <OrbitCarousel teamMembers={teamMembers} />
           
