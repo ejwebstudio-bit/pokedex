@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Card from "../components/Card";
 import Modal from "../components/ui/modal";
-import { useGetAllPokemonsQuery } from "@/store/api/pokemonApi";
+import { useGetAllPokemonsQuery, useGetFilteredPokemonsQuery } from "@/store/api/pokemonApi";
+import { useGetAllTypesQuery } from "@/store/api/typeApi";
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { Pokemon } from "@/store/api/pokemonApi";
 import { TeamMemberCard } from "@/components/TeamMemberCard";
@@ -15,7 +16,22 @@ export default function Home() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon>();
 
-  const { data: pokemons, isLoading, isError, error} = useGetAllPokemonsQuery();
+  const [searchName, setSearchName] = useState("");
+  const [selectedTypeId, setSelectedTypeId] = useState<number | undefined>(undefined);
+
+  const hasFilters = searchName !== "" || selectedTypeId !== undefined;
+
+  const { data: allPokemons, isLoading: allLoading, isError: allError, error: allErrorData } = useGetAllPokemonsQuery(undefined, { skip: hasFilters });
+  const { data: filteredPokemons, isLoading: filteredLoading, isError: filteredError, error: filteredErrorData } = useGetFilteredPokemonsQuery(
+    { name: searchName || undefined, typeId: selectedTypeId },
+    { skip: !hasFilters }
+  );
+  const { data: types } = useGetAllTypesQuery();
+
+  const isLoading = hasFilters ? filteredLoading : allLoading;
+  const isError = hasFilters ? filteredError : allError;
+  const error = hasFilters ? filteredErrorData : allErrorData;
+  const pokemons = hasFilters ? filteredPokemons : allPokemons;
 
   if (isLoading) return <p>Chargement...</p>;
   if (isError) return <p>Erreur : {(error as FetchBaseQueryError).status}</p>;
@@ -43,6 +59,27 @@ export default function Home() {
           <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-slate-400 max-w-2xl mx-auto px-4">
             Choisis tes Pokémons favoris et créér ton équipe de reve pour devenir le meilleur dresseur !
           </p>
+        </div>
+
+        {/* Search & Filters Section */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <input
+            type="text"
+            placeholder="Rechercher un Pokémon..."
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+            className="w-full sm:w-64 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <select
+            value={selectedTypeId ?? ""}
+            onChange={(e) => setSelectedTypeId(e.target.value ? Number(e.target.value) : undefined)}
+            className="w-full sm:w-48 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Tous les types</option>
+            {types?.map((type) => (
+              <option key={type.id} value={type.id}>{type.name}</option>
+            ))}
+          </select>
         </div>
 
         {/* Fully responsive grid with 4 columns max on desktop */}

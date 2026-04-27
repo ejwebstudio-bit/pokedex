@@ -33,8 +33,16 @@ export const pokemonApi = createApi({
     }),
     getPokemonById: builder.query<Pokemon, string>({
       query: (id: string) => `/pokemons/${id}`,
-    })
+    }),
+    getFilteredPokemons: builder.query<Pokemon[], { name?: string; typeId?: number }>({
+      query: (filters) => {
+        const params = new URLSearchParams();
+        if (filters.name) params.append('name', filters.name);
+        if (filters.typeId) params.append('typeId', String(filters.typeId));
+        return `/pokemons?${params.toString()}`;
+      },
+    }),
   }),
 });
 
-export const { useGetAllPokemonsQuery, useGetPokemonByIdQuery } = pokemonApi;
+export const { useGetAllPokemonsQuery, useGetPokemonByIdQuery, useGetFilteredPokemonsQuery } = pokemonApi;
