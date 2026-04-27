@@ -3,6 +3,7 @@
 import type { Pokemon } from '@/store/api/pokemonApi';
 import { Badge } from './ui/badge';
 import { Heart } from "lucide-react";
+import { useFavorites } from '@/hooks/useFavorites';
 
 
 interface CardProps {
@@ -13,6 +14,13 @@ interface CardProps {
 
 export default function Card ({ onClick, pokemon }: CardProps) {
   
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorite = isFavorite(pokemon.id);
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleFavorite(pokemon.id);
+  };
 
   return (
     <div onClick={onClick} className="cursor-pointer relative group overflow-hidden rounded-2xl sm:rounded-3xl bg-white dark:bg-black border border-gray-200 dark:border-gray-800 shadow-lg shadow-gray-200/50 dark:shadow-black/20 transition-all duration-300 hover:shadow-xl hover:shadow-gray-300/50 dark:hover:shadow-black/40 hover:-translate-y-1 hover:border-gray-300 dark:hover:border-gray-700 w-full font-space-grotesk">
@@ -22,7 +30,12 @@ export default function Card ({ onClick, pokemon }: CardProps) {
           <div className="relative">
             <img  src={`./img/${pokemon.id}.webp`} alt={pokemon.name} className="shadow-2xl  rounded-xl sm:rounded-2xl object-cover aspect-square w-32 h-32" />
             <div className="flex gap-2 absolute top-2 right-2 sm:top-4 sm:right-4 bg-black/70 dark:bg-black/70 text-white p-1.5 sm:p-2.5 rounded-full transition-colors hover:text-red-500 backdrop-blur-sm border border-white/20">
-              <Heart className="w-4 h-4 sm:w-6 sm:h-6" />
+              <Heart
+                className="w-4 h-4 sm:w-6 sm:h-6 cursor-pointer"
+                fill={favorite ? '#ef4444' : 'none'}
+                color={favorite ? '#ef4444' : 'currentColor'}
+                onClick={handleFavoriteClick}
+              />
               <p className="text-xs sm:text-sm text-white dark:text-gray-400 mt-1">{pokemon.hp}</p>
             </div>
           </div>
