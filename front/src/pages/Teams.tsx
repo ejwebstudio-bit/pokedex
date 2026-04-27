@@ -3,12 +3,11 @@ import React from 'react';
 import Modal from "../components/ui/modal";
 import { useState } from 'react';
 import OrbitCarousel from '@/components/ui/orbit-carousel';
-import { Trash } from "lucide-react";
-import { useCreateOneTeamMutation, useDeleteOneTeamMutation, useGetAllTeamsQuery, useRemovePokemonToTeamMutation } from "@/store/api/teamApi";
+import { Pencil, Trash, X, Check } from "lucide-react";
+import { useCreateOneTeamMutation, useDeleteOneTeamMutation, useGetAllTeamsQuery, useRemovePokemonToTeamMutation, useUpdateTeamMutation } from "@/store/api/teamApi";
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { Team } from "@/store/api/teamApi";
 import { Button } from '@/components/ui/button';
-
 
 
 
@@ -29,19 +28,22 @@ const Teams: React.FC = () => {
 
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
+  const [showEditTeamModal, setShowEditTeamModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team>();
   const [teamName, setTeamName] = useState('');
   const [teamDescription, setTeamDescription] = useState('');
+  const [editTeamName, setEditTeamName] = useState('');
+  const [editTeamDescription, setEditTeamDescription] = useState('');
 
   const teamMembers = selectedTeam?.pokemons
 
   const { data: teams, isLoading: teamsLoading, isError: teamsIsError, error: teamsError} = useGetAllTeamsQuery();
-  const [updateTeam, { isLoading: updateIsLoading, isError: updateIsError }] = useCreateOneTeamMutation();
-  const [deleteTeam, { isLoading: deleteIsLoading, isError: deleteIsError }] = useDeleteOneTeamMutation();
-
   const [createTeam, { isLoading, isError }] = useCreateOneTeamMutation();
+  const [updateTeam, { isLoading: updateIsLoading, isError: updateIsError }] = useUpdateTeamMutation();
+  const [deleteTeam, { isLoading: deleteIsLoading, isError: deleteIsError }] = useDeleteOneTeamMutation();
+  const [removePokemon, { isLoading: removeIsLoading }] = useRemovePokemonToTeamMutation();
 
-  if (teamsLoading || isLoading || updateIsLoading || deleteIsLoading) return <p>Chargement...</p>;
+  if (teamsLoading || isLoading || updateIsLoading || deleteIsLoading || removeIsLoading) return <p>Chargement...</p>;
   if (teamsIsError || isError || updateIsError || deleteIsError) return <p>Erreur : {(teamsError as FetchBaseQueryError).status}</p>;
 
   function handleShowTeam (team: Team) {
@@ -51,6 +53,13 @@ const Teams: React.FC = () => {
 
   function handleShowCreateTeamForm () {
     setShowCreateTeamModal(true);
+  }
+
+  function handleShowEditTeamForm () {
+    if (!selectedTeam) return;
+    setEditTeamName(selectedTeam.name);
+    setEditTeamDescription(selectedTeam.description);
+    setShowEditTeamModal(true);
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -69,7 +78,28 @@ const Teams: React.FC = () => {
         setTeamName('');
         setTeamDescription('');
       } catch (err) {
-        console.error('❌ Erreur lors de la création de l’équipe :', err);
+        console.error('❌ Erreur lors de la création de l\'équipe :', err);
+      }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedTeam?.id) return;
+
+    const formData = {
+      name: editTeamName,
+      description: editTeamDescription
+    };
+
+    try {
+        const response = await updateTeam({ id: selectedTeam.id, body: formData as Team }).unwrap();
+        console.log('✅ Équipe modifiée :', response);
+
+        // Mettre à jour l'équipe sélectionnée localement
+        setSelectedTeam(response);
+        setShowEditTeamModal(false);
+      } catch (err) {
+        console.error('❌ Erreur lors de la modification de l\'équipe :', err);
       }
   };
 
@@ -86,7 +116,20 @@ const Teams: React.FC = () => {
       console.log('✅ Équipe supprimée :', response);
       setShowTeamModal(false);
     } catch (err) {
-      console.error('❌ Erreur lors de la suppression de l’équipe :', err);
+      console.error('❌ Erreur lors de la suppression de l\'équipe :', err);
+    }
+  }
+
+  async function handleRemovePokemon (pokemonId: number) {
+    if (!selectedTeam?.id) return;
+
+    try {
+      const response = await removePokemon({ idTeam: selectedTeam.id, idPokemon: String(pokemonId) }).unwrap();
+      console.log('✅ Pokémon retiré :', response);
+      // Mettre à jour l'équipe sélectionnée localement
+      setSelectedTeam(response);
+    } catch (err) {
+      console.error('❌ Erreur lors du retrait du Pokémon :', err);
     }
   }
 
@@ -122,10 +165,11 @@ const Teams: React.FC = () => {
                 title={`${selectedTeam?.name}`}
               >
                 <h1 className='text-center'>{selectedTeam?.description}</h1>
-                
-                <Button onClick={() => handleDeleteTeam(selectedTeam?.id)}><Trash/></Button>
-                <OrbitCarousel teamMembers={teamMembers} />
-          
+                <div className="flex justify-center gap-2 mt-4">
+                  <Button onClick={handleShowEditTeamForm} variant="outline"><Pencil/></Button>
+                  <Button onClick={() => handleDeleteTeam(selectedTeam?.id)} variant="destructive"><Trash/></Button>
+                </div>
+                <OrbitCarousel teamMembers={teamMembers} onRemovePokemon={handleRemovePokemon} />
               </Modal>
               <Modal
                 isOpen={showCreateTeamModal}
@@ -162,6 +206,46 @@ const Teams: React.FC = () => {
                     </div>
                     <div>
                       <Button>Créer</Button>
+                    </div>
+                  </form>
+                </div>
+              </Modal>
+              <Modal
+                isOpen={showEditTeamModal}
+                onClose={() => setShowEditTeamModal(false)}
+                title={"Modifier l'équipe"}
+              >
+                <div className=''>
+                  <form onSubmit={handleEditSubmit} className='space-y-4'>
+                    <div>
+                      <label>Saisissez le nom de l'équipe</label>
+                      <input 
+                        type="text"
+                        autoComplete='username'
+                        value={editTeamName}
+                        onChange={(e) => setEditTeamName(e.target.value)}
+                        required
+                        placeholder="Team Roquette"
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                        >
+                      </input>
+                    </div>
+                    <div className='space-y-1'>
+                      <label >Redigez une courte déscription</label>
+                      <input 
+                        placeholder="Description"
+                        type="text"
+                        autoComplete='username'
+                        value={editTeamDescription}
+                        onChange={(e) => setEditTeamDescription(e.target.value)}
+                        required
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                        >    
+                      </input>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button type="button" variant="outline" onClick={() => setShowEditTeamModal(false)}><X/> Annuler</Button>
+                      <Button type="submit"><Check/> Enregistrer</Button>
                     </div>
                   </form>
                 </div>

@@ -2,9 +2,8 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Trash } from "lucide-react";
 import type { Pokemon } from "@/store/api/pokemonApi";
-
 
 
 
@@ -34,11 +33,12 @@ const useIsMobile = (breakpoint: number = 768): boolean => {
 
 interface TeamMembersProps {
   teamMembers?: Pokemon[],
+  onRemovePokemon?: (pokemonId: number) => void,
 }
 
 
 // --- Main Component ---
-export default function OrbitCarousel({teamMembers = []}:TeamMembersProps) {
+export default function OrbitCarousel({teamMembers = [], onRemovePokemon}:TeamMembersProps) {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const isMobile = useIsMobile();
 
@@ -163,6 +163,25 @@ export default function OrbitCarousel({teamMembers = []}:TeamMembersProps) {
                 <ChevronRight size={16} className="text-gray-700 dark:text-gray-300" />
               </button>
             </motion.div>
+            {onRemovePokemon && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.25 }}
+                className="mt-3"
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemovePokemon(teamMembers[activeIndex].id);
+                  }}
+                  className="flex items-center justify-center gap-1 w-full py-1.5 text-xs rounded-full bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50 transition-colors"
+                >
+                  <Trash size={12} />
+                  Retirer
+                </button>
+              </motion.div>
+            )}
           </motion.div>
         </AnimatePresence>
 
