@@ -3,6 +3,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { pokemonApi } from './api/pokemonApi';
 import { teamApi } from './api/teamApi';
 import { typeApi } from './api/typeApi';
+import { memberApi } from './api/memberApi';
 
 export const store = configureStore({
   reducer: {
@@ -10,12 +11,13 @@ export const store = configureStore({
     [pokemonApi.reducerPath]: pokemonApi.reducer,
     [teamApi.reducerPath]: teamApi.reducer,
     [typeApi.reducerPath]: typeApi.reducer,
+    [memberApi.reducerPath]: memberApi.reducer,
   },
   // Ajout du middleware RTK Query
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
   .concat(pokemonApi.middleware)
   .concat(teamApi.middleware)
-  .concat(typeApi.middleware),
-    
+  .concat(typeApi.middleware)
+  .concat(memberApi.middleware),    
 });

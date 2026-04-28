@@ -42,7 +42,7 @@ export const teamApi = createApi({
     }),
     updateTeam: builder.mutation<Team, { id: string; body: Team }>({
       query: ({ id, body }) => ({
-        url: `/${id}`,
+        url: `/teams/${id}`,
         method: "PATCH",
         body
       }),
