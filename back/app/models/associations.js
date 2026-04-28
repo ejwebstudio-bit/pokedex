@@ -1,6 +1,7 @@
 import { Pokemon } from "./pokemon.model.js";
 import { Team } from "./team.model.js";
 import { Type } from "./type.model.js";
+import { Member } from "./member.model.js";
 
 
 Pokemon.belongsToMany(Type, {
@@ -27,5 +28,15 @@ Team.belongsToMany(Pokemon, {
     foreignKey:"team_id"
 });
 
-export { Pokemon, Type, Team };
+// Member associations
+Member.belongsTo(Team, {
+  as: "team",
+  foreignKey: "team_id",
+});
 
+Team.hasMany(Member, {
+  as: "members",
+  foreignKey: "team_id",
+});
+
+export { Pokemon, Type, Team, Member };
