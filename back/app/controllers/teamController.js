@@ -147,8 +147,8 @@ export async function addPokemonToTeam(req, res) {
     }
 
     // ✅ Vérifier AVANT d'ajouter
-    if (team.pokemons.length >= 5) {
-      return res.status(400).json({ error: "Team already has 5 Pokémon" });
+    if (team.pokemons.length >= 7) {
+      return res.status(400).json({ error: "Team already has 7 Pokémon" });
     }
 
     await team.addPokemon(pokemon);
