@@ -52,6 +52,8 @@ const Teams: React.FC = () => {
   const [teamDescription, setTeamDescription] = useState('');
   const [editTeamName, setEditTeamName] = useState('');
   const [editTeamDescription, setEditTeamDescription] = useState('');
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [teamToDelete, setTeamToDelete] = useState<string | undefined>();
 
   const teamMembers = selectedTeam?.pokemons
 
@@ -121,11 +123,16 @@ const Teams: React.FC = () => {
       }
   };
 
-  async function handleDeleteTeam (selectedTeamId?: string) {
+  function handleConfirmDelete (teamId?: string) {
+    setTeamToDelete(teamId);
+    setShowDeleteConfirmModal(true);
+  }
 
-    if (!selectedTeamId) return;
+  async function handleDeleteTeam () {
 
-    const teamId = String(selectedTeamId);
+    if (!teamToDelete) return;
+
+    const teamId = String(teamToDelete);
 
     console.log('TEAMID :', teamId)
 
@@ -133,6 +140,8 @@ const Teams: React.FC = () => {
       const response = await deleteTeam( teamId ).unwrap();
       console.log('✅ Équipe supprimée :', response);
       setShowTeamModal(false);
+      setShowDeleteConfirmModal(false);
+      setTeamToDelete(undefined);
     } catch (err) {
       console.error('❌ Erreur lors de la suppression de l\'équipe :', err);
     }
@@ -185,9 +194,29 @@ const Teams: React.FC = () => {
                 <h1 className='text-center'>{selectedTeam?.description}</h1>
                 <div className="flex justify-center gap-2 mt-4">
                   <Button onClick={handleShowEditTeamForm} variant="outline"><Pencil/></Button>
-                  <Button onClick={() => handleDeleteTeam(selectedTeam?.id)} variant="destructive"><Trash/></Button>
+                  <Button onClick={() => handleConfirmDelete(selectedTeam?.id)} variant="destructive"><Trash/></Button>
                 </div>
                 <OrbitCarousel teamMembers={teamMembers} onRemovePokemon={handleRemovePokemon} />
+              </Modal>
+              <Modal
+                isOpen={showDeleteConfirmModal}
+                onClose={() => { setShowDeleteConfirmModal(false); setTeamToDelete(undefined); }}
+                title="Confirmer la suppression"
+                size="sm"
+              >
+                <div className="space-y-4">
+                  <p className="text-gray-700 dark:text-gray-300">
+                    Êtes-vous sûr de vouloir supprimer l'équipe <strong>{selectedTeam?.name}</strong> ? Cette action est irréversible.
+                  </p>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => { setShowDeleteConfirmModal(false); setTeamToDelete(undefined); }}>
+                      <X/> Annuler
+                    </Button>
+                    <Button type="button" variant="destructive" onClick={handleDeleteTeam}>
+                      <Trash/> Supprimer
+                    </Button>
+                  </div>
+                </div>
               </Modal>
               <Modal
                 isOpen={showCreateTeamModal}
