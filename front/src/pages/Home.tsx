@@ -4,8 +4,10 @@ import { useState } from "react";
 import Card from "../components/Card";
 import Modal from "../components/ui/modal";
 import { useGetAllPokemonsQuery } from "@/store/api/pokemonApi";
+import { useGetAllTeamsQuery, useAddPokemonToTeamMutation } from "@/store/api/teamApi";
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { Pokemon } from "@/store/api/pokemonApi";
+import type { Team } from "@/store/api/teamApi";
 import { TeamMemberCard } from "@/components/TeamMemberCard";
 
 
@@ -13,9 +15,13 @@ import { TeamMemberCard } from "@/components/TeamMemberCard";
 export default function Home() {
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showTeamSelector, setShowTeamSelector] = useState(false);
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon>();
+  const [addToast, setAddToast] = useState<string | null>(null);
 
   const { data: pokemons, isLoading, isError, error} = useGetAllPokemonsQuery();
+  const { data: teams } = useGetAllTeamsQuery();
+  const [addPokemonToTeam, { isLoading: isAdding }] = useAddPokemonToTeamMutation();
 
   if (isLoading) return <p>Chargement...</p>;
   if (isError) return <p>Erreur : {(error as FetchBaseQueryError).status}</p>;
@@ -23,6 +29,19 @@ export default function Home() {
   function handleShowDetails (pokemon: Pokemon) {
     setSelectedPokemon(pokemon);
     setShowDetailsModal(true);
+  }
+
+  async function handleAddToTeam(teamId: string) {
+    if (!selectedPokemon) return;
+    try {
+      await addPokemonToTeam({ idTeam: teamId, idPokemon: String(selectedPokemon.id) }).unwrap();
+      setAddToast(`✅ ${selectedPokemon.name} ajouté à l'équipe !`);
+      setShowTeamSelector(false);
+      setTimeout(() => setAddToast(null), 3000);
+    } catch (err) {
+      setAddToast("❌ Erreur : l'équipe a peut-être déjà 5 Pokémon");
+      setTimeout(() => setAddToast(null), 3000);
+    }
   }
 
   console.log('Pokemon DATA :', pokemons)
@@ -65,16 +84,66 @@ export default function Home() {
           font-family: 'Space Grotesk', sans-serif;
         }
       `}</style>
+    
+    {/* Toast notification */}
+    {addToast && (
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-xl shadow-2xl text-sm font-medium animate-bounce">
+        {addToast}
+      </div>
+    )}
+
     <Modal
       isOpen={showDetailsModal}
       onClose={() => setShowDetailsModal(false)}
       title='Détails'
     >
       {selectedPokemon ? (
+        <>
           <Card pokemon={selectedPokemon}/>
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={() => { setShowDetailsModal(false); setShowTeamSelector(true); }}
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-lg shadow-blue-600/20"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Ajouter à une équipe
+            </button>
+          </div>
+        </>
+      ) : (
+        <div>Aucun Pokémon sélectionné</div>
+      )}
+    </Modal>
+
+    {/* Team Selector Modal */}
+    <Modal
+      isOpen={showTeamSelector}
+      onClose={() => setShowTeamSelector(false)}
+      title="Choisir une équipe"
+    >
+      <div className="space-y-2 max-h-64 overflow-y-auto">
+        {teams && teams.length > 0 ? (
+          teams.map((team: Team) => (
+            <button
+              key={team.id}
+              onClick={() => handleAddToTeam(team.id)}
+              disabled={isAdding}
+              className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+            >
+              <p className="font-medium text-gray-900 dark:text-white">{team.name}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {team.pokemons?.length || 0}/5 Pokémon
+              </p>
+            </button>
+          ))
         ) : (
-          <div>Aucun Pokémon sélectionné</div>
+          <p className="text-center text-gray-500 dark:text-gray-400 py-4">
+            Aucune équipe disponible. Crée-en une depuis la page Équipes !
+          </p>
         )}
+      </div>
     </Modal>
     </div>
   );
