@@ -5,11 +5,31 @@ import { Badge } from './ui/badge';
 interface TeamMemberCardProps {
   pokemon: Pokemon;
   onClick?: () => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 }
 
-export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ onClick, pokemon }) => {
+export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ onClick, pokemon, isFavorite, onToggleFavorite }) => {
+  
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleFavorite();
+  };
+
   return (
-    <div onClick={onClick}  className="group flex shadow-2xl flex-col items-center text-center p-6 bg-white dark:bg-gray-900 rounded-2xl hover:shadow-xl dark:shadow-gray-900/20 dark:hover:shadow-gray-900/40 transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:-translate-y-1">
+    <div onClick={onClick} className="group relative flex shadow-2xl flex-col items-center text-center p-6 bg-white dark:bg-gray-900 rounded-2xl hover:shadow-xl dark:shadow-gray-900/20 dark:hover:shadow-gray-900/40 transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:-translate-y-1">
+      {/* Favorite heart button - top right of the card container */}
+      <button
+        onClick={handleFavoriteClick}
+        className="absolute top-3 right-3 p-1.5 bg-black/60 dark:bg-black/60 rounded-full backdrop-blur-sm border border-white/20 transition-all duration-200 hover:scale-110 z-10"
+        aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+      >
+        <Heart
+          className="w-5 h-5 sm:w-6 sm:h-6"
+          fill={isFavorite ? '#ef4444' : 'none'}
+          color={isFavorite ? '#ef4444' : 'white'}
+        />
+      </button>
       <div className="relative w-32 h-32 md:w-40 md:h-40 mb-4">
         <div className="absolute inset-0 bg-linear-to-br from-blue-400 via-purple-500 to-pink-500 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
         <img
