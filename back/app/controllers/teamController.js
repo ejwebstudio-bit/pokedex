@@ -263,12 +263,17 @@ export async function deleteTeam (req, res) {
     const teamId = parseInt(req.params.id);
 
     // Je vérifie que la team existe en BDD
-    const team = await Team.findByPk(teamId);
+    const team = await Team.findByPk(teamId, {
+      include: [{ association: "pokemons" }]
+    });
     if (! team) {
       return res.status(404).json({ error: `Team with ID ${teamId} not found` });
     }
 
-    // Je kill la team en question
+    // Supprimer d'abord les liaisons dans la table team_pokemon
+    await team.setPokemons([]);
+
+    // Puis je kill la team en question
     await team.destroy();
 
     // Je repond au client avec le code 200 et un message
