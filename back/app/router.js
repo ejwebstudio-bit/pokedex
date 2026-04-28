@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as pokemonController from "./controllers/pokemonController.js";
 import * as teamController from "./controllers/teamController.js";
 import * as typeController from "./controllers/typeController.js";
+import * as memberController from "./controllers/memberController.js";
 
 export const router = Router();
 
@@ -25,3 +26,10 @@ router.delete('/team/:idTeam/pokemon/:idPokemon', teamController.removePokemonTo
 router.get("/types", typeController.getAllTypes);
 router.get("/types/:id", typeController.getOneType);
 
+// Members routes
+router.get("/members", memberController.getAllMembers);
+router.get("/members/:id", memberController.getOneMember);
+router.get("/teams/:teamId/members", memberController.getMembersByTeam);
+router.post("/members", memberController.createMember);
+router.patch("/members/:id", memberController.updateMember);
+router.delete("/members/:id", memberController.deleteMember);

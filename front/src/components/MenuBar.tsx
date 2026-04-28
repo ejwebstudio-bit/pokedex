@@ -2,7 +2,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { Home, LayoutDashboard, Settings, User } from 'lucide-react';
+import { Home, LayoutDashboard, Settings, User, Sun, Moon, Users } from 'lucide-react';
+import { useTheme } from '../hooks/useTheme';
 
 // --- MenuBar Component ---
 
@@ -35,6 +36,13 @@ const menuItems: MenuItem[] = [
     href: "/teams",
     gradient: "radial-gradient(circle, rgba(34,197,94,0.15) 0%, rgba(22,163,74,0.06) 50%, rgba(21,128,61,0) 100%)",
     iconColor: "group-hover:text-green-500 dark:group-hover:text-green-400",
+  },
+  {
+    icon: <Users className="h-5 w-5" />,
+    label: "Membres",
+    href: "/team-manager",
+    gradient: "radial-gradient(circle, rgba(147,51,234,0.15) 0%, rgba(126,34,206,0.06) 50%, rgba(107,33,168,0) 100%)",
+    iconColor: "group-hover:text-purple-500 dark:group-hover:text-purple-400",
   },
 ];
 
@@ -94,6 +102,7 @@ interface MenuBarProps {
 }
 
 function MenuBar({ onProfileClick }: MenuBarProps): React.JSX.Element {
+  const { theme, toggle, isDark } = useTheme();
   return (
     <motion.nav
       className="p-2 rounded-2xl bg-white/60 dark:bg-black/60 backdrop-blur-lg border border-gray-200/80 dark:border-gray-800/80 shadow-lg dark:shadow-gray-900/20 relative overflow-hidden"
@@ -212,6 +221,26 @@ function MenuBar({ onProfileClick }: MenuBarProps): React.JSX.Element {
                 <span  className="font-medium">{UserItem.label}</span>
               </motion.button>
             </motion.div>
+            {/* Theme toggle button */}
+            <li className="relative ml-2">
+              <motion.button
+                type="button"
+                onClick={toggle}
+                className="flex items-center justify-center p-2 rounded-xl relative z-10 bg-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <motion.span
+                  key={theme}
+                  initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+                  animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                >
+                  {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </motion.span>
+              </motion.button>
+            </li>
       </ul>
     </motion.nav>
   );

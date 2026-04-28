@@ -3,6 +3,7 @@ import React, {
   useEffect,
   createContext,
   useContext,
+  useState,
 } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -57,9 +58,8 @@ function Drawer ({
                 <DrawerHeader>
                   <DrawerTitle className="items-start">Mon Profil</DrawerTitle>
                 </DrawerHeader>
-                <div className="p-6">Contenu</div>
+                <DrawerContentBody />
               </DrawerContent>
-            
           </React.Fragment>
         )}
       </AnimatePresence>
@@ -252,6 +252,91 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   )
 );
 Button.displayName = "Button";
+
+function DrawerContentBody() {
+  const [activeSection, setActiveSection] = useState<"stats" | "preferences">("stats");
+
+  return (
+    <div className="flex flex-col h-full p-6 pt-0">
+      {/* Onglets de navigation */}
+      <div className="flex gap-2 mb-4 border-b border-gray-200 dark:border-gray-800 pb-2">
+        <button
+          onClick={() => setActiveSection("stats")}
+          className={`text-sm font-medium px-3 py-1.5 rounded-md transition-colors ${
+            activeSection === "stats"
+              ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-50"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          }`}
+        >
+          Statistiques
+        </button>
+        <button
+          onClick={() => setActiveSection("preferences")}
+          className={`text-sm font-medium px-3 py-1.5 rounded-md transition-colors ${
+            activeSection === "preferences"
+              ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-50"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          }`}
+        >
+          Préférences
+        </button>
+      </div>
+
+      {/* Section Statistiques */}
+      {activeSection === "stats" && (
+        <div className="space-y-4 overflow-y-auto flex-1">
+          <div className="grid grid-cols-2 gap-3">
+            <StatCard label="Pokémons" value="—" icon="🔢" />
+            <StatCard label="Équipes" value="—" icon="👥" />
+            <StatCard label="Membres" value="—" icon="🧑‍🤝‍🧑" />
+            <StatCard label="Complétion" value="—" icon="🏆" />
+          </div>
+          <p className="text-xs text-gray-400 italic mt-2">
+            Les statistiques apparaîtront une fois la fonction Dashboard implémentée.
+          </p>
+        </div>
+      )}
+
+      {/* Section Préférences */}
+      {activeSection === "preferences" && (
+        <div className="space-y-4 overflow-y-auto flex-1">
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-gray-700 dark:text-gray-300">Thème sombre</span>
+            <div className="w-10 h-5 bg-gray-300 dark:bg-gray-600 rounded-full relative cursor-not-allowed opacity-50">
+              <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5" />
+            </div>
+          </div>
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-gray-700 dark:text-gray-300">Notifications</span>
+            <div className="w-10 h-5 bg-gray-300 dark:bg-gray-600 rounded-full relative cursor-not-allowed opacity-50">
+              <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5" />
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 italic mt-2">
+            Les préférences seront disponibles dans une mise à jour future.
+          </p>
+        </div>
+      )}
+
+      {/* Pied */}
+      <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
+        <p className="text-xs text-gray-400 text-center">
+          Pokédex App v1.0.0
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, icon }: { label: string; value: string; icon: string }) {
+  return (
+    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 text-center border border-gray-200 dark:border-gray-800">
+      <span className="text-lg">{icon}</span>
+      <p className="text-lg font-bold text-gray-900 dark:text-gray-50">{value}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+    </div>
+  );
+}
 
 export {
   Drawer,
