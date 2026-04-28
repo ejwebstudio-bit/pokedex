@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { Home, LayoutDashboard, Settings, User, Sun, Moon } from 'lucide-react';
+import { Home, LayoutDashboard, Settings, User, Sun, Moon, Users } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
 // --- MenuBar Component ---
