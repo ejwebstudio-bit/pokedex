@@ -271,8 +271,8 @@ export async function deleteTeam (req, res) {
     // Je kill la team en question
     await team.destroy();
 
-    // Je repond au client avec le status code 204
-    res.status(204).end();
+    // Je repond au client avec le code 200 et un message
+    res.status(200).json({ success: true, message: "Team deleted successfully" });
 
   } catch (error) {
     console.error(error);
