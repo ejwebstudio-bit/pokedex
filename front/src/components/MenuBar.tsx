@@ -27,8 +27,8 @@ const menuItems: MenuItem[] = [
     icon: <LayoutDashboard className="h-5 w-5" />,
     label: "Dashboard",
     href: "/dashboard",
-    gradient: "radial-gradient(circle, rgba(234,179,8,0.15) 0%, rgba(202,138,4,0.06) 50%, rgba(161,98,7,0) 100%)",
-    iconColor: "group-hover:text-yellow-500 dark:group-hover:text-yellow-400",
+    gradient: "radial-gradient(circle, rgba(168,85,247,0.15) 0%, rgba(147,51,234,0.06) 50%, rgba(126,34,206,0) 100%)",
+    iconColor: "group-hover:text-purple-500 dark:group-hover:text-purple-400",
   },
   {
     icon: <Settings className="h-5 w-5" />,
