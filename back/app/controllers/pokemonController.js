@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { Pokemon } from "../models/associations.js"; //anciennent "../models/pokemon.model.js"
 import { Type } from '../models/type.model.js';
 
@@ -5,18 +6,33 @@ import { Type } from '../models/type.model.js';
 
 export async function getAllPokemons(req, res) {
     try {
+        const { name, typeId } = req.query;
+
+        // Construire la clause WHERE
+        const whereClause = {};
+        if (name) {
+          whereClause.name = { [Op.iLike]: `%${name}%` };
+        }
+
+        // Construire la clause include (filtrage sur type si nécessaire)
+        const includeClause = [
+          {
+            model: Type,
+            as: "types",
+            attributes: ["id", "name", "color"],
+            through: { attributes: [] },
+          },
+        ];
+
+        if (typeId) {
+          includeClause[0].where = { id: parseInt(typeId) };
+        }
 
         // Récupérer la liste des Pokemons
         const pokemons = await Pokemon.findAll({
+          where: whereClause,
           order: [["id", "asc"]],
-          include: [
-            {
-              model: Type,
-              as: "types", // doit correspondre à l'alias défini dans le modèle
-              attributes: ["id", "name", "color"], // on ne prend que les champs utiles
-              through: { attributes: [] }
-            },
-          ],
+          include: includeClause,
         });
       
         // Renvoyer la liste des Pokemons au format JSON avec le code succès 200
