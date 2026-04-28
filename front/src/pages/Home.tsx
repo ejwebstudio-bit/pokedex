@@ -18,7 +18,7 @@ export default function Home() {
   const [favoritesOnly, setFavoritesOnly] = useState(false);
 
   const { data: pokemons, isLoading, isError, error} = useGetAllPokemonsQuery();
-  const { isFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const filteredPokemons = favoritesOnly
     ? pokemons?.filter((p) => isFavorite(p.id))
@@ -68,7 +68,13 @@ export default function Home() {
         {/* Fully responsive grid with 4 columns max on desktop */}
         <div  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
           {filteredPokemons?.map((pokemon) => (
-            <TeamMemberCard onClick={() => handleShowDetails(pokemon)} key={pokemon.id} pokemon={pokemon} />
+            <TeamMemberCard
+              onClick={() => handleShowDetails(pokemon)}
+              key={pokemon.id}
+              pokemon={pokemon}
+              isFavorite={isFavorite(pokemon.id)}
+              onToggleFavorite={() => toggleFavorite(pokemon.id)}
+            />
           ))}
         </div>
       </div>
