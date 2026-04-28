@@ -1,6 +1,15 @@
 import { Team } from '../models/associations.js'; // ancien camino'../models/team.model.js'
 import { Pokemon } from '../models/associations.js';
 
+function computeTeamLevel(pokemons) {
+  const totalStats = pokemons.reduce((sum, p) => {
+    return sum + (p.hp || 0) + (p.atk || 0) + (p.def || 0)
+              + (p.atk_spe || 0) + (p.def_spe || 0) + (p.speed || 0);
+  }, 0);
+  const level = Math.floor(totalStats / 100) + 1;
+  return { totalStats, level };
+}
+
 export async function getAllTeams(req, res) {
   try {
     // Récupérer la liste des Pokemons
@@ -14,8 +23,17 @@ export async function getAllTeams(req, res) {
       },
     ],});
       
+    // Ajouter level et totalStats à chaque équipe
+    const enrichedTeams = teams.map(team => {
+      const teamJson = team.toJSON();
+      const { totalStats, level } = computeTeamLevel(teamJson.pokemons || []);
+      teamJson.totalStats = totalStats;
+      teamJson.level = level;
+      return teamJson;
+    });
+
     // Renvoyer la liste des teams au format JSON avec le code succès 200
-    res.status(200).json(teams);
+    res.status(200).json(enrichedTeams);
         
   } catch (error) {
     console.error(error);
@@ -34,16 +52,30 @@ export async function getOneTeam(req, res) {
       return res.status(404).json({ error: "Team not found. Please verify the provided ID" });
     }
 
-    // Récupérer le Pokemon by ID
-    const oneTeam = await Team.findByPk(TeamId);
+    // Récupérer la team by ID avec ses pokémons
+    const oneTeam = await Team.findByPk(TeamId, {
+      include: [
+        {
+          model: Pokemon,
+          as: "pokemons",
+          through: { attributes: [] }
+        },
+      ],
+    });
 
-     // Je vérifie si le Pokemon existe en BDD
-    if (! oneTeam) {
+     // Je vérifie si la team existe en BDD
+    if (!oneTeam) {
     return res.status(404).json({ error: "Pokemon not found. Please verify the provided ID" });
   }
   
-    // Renvoyer le Pokemon au format JSON avec le code succès 200
-    res.status(200).json(oneTeam);
+    // Ajouter level et totalStats
+    const teamJson = oneTeam.toJSON();
+    const { totalStats, level } = computeTeamLevel(teamJson.pokemons || []);
+    teamJson.totalStats = totalStats;
+    teamJson.level = level;
+
+    // Renvoyer la team au format JSON avec le code succès 200
+    res.status(200).json(teamJson);
     
   } catch (error) {
     console.error(error);
