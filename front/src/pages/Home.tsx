@@ -5,6 +5,7 @@ import Card from "../components/Card";
 import Modal from "../components/ui/modal";
 
 import { useGetAllPokemonsQuery, useGetFilteredPokemonsQuery } from "@/store/api/pokemonApi";
+import { useGetAllTypesQuery } from "@/store/api/typeApi";
 import { useGetAllTeamsQuery, useAddPokemonToTeamMutation } from "@/store/api/teamApi";
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { Pokemon } from "@/store/api/pokemonApi";
@@ -37,10 +38,9 @@ export default function Home() {
   const isError = hasFilters ? filteredError : allError;
   const error = hasFilters ? filteredErrorData : allErrorData;
   const pokemons = hasFilters ? filteredPokemons : allPokemons;
-  const { data: pokemons, isLoading, isError, error} = useGetAllPokemonsQuery();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const filteredPokemons = favoritesOnly
+  const displayedPokemons = favoritesOnly
     ? pokemons?.filter((p) => isFavorite(p.id))
     : pokemons;
   const [addToast, setAddToast] = useState<string | null>(null);
@@ -125,7 +125,7 @@ export default function Home() {
 
         {/* Fully responsive grid with 4 columns max on desktop */}
         <div  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
-          {filteredPokemons?.map((pokemon) => (
+          {displayedPokemons?.map((pokemon) => (
             <TeamMemberCard
               onClick={() => handleShowDetails(pokemon)}
               key={pokemon.id}
