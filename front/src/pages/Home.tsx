@@ -102,7 +102,7 @@ export default function Home() {
           <Card pokemon={selectedPokemon}/>
           <div className="mt-4 flex justify-center">
             <button
-              onClick={() => { setShowTeamSelector(true); }}
+              onClick={() => { setShowDetailsModal(false); setShowTeamSelector(true); }}
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-lg shadow-blue-600/20"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
