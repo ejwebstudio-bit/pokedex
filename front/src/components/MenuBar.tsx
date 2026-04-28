@@ -37,6 +37,13 @@ const menuItems: MenuItem[] = [
     gradient: "radial-gradient(circle, rgba(34,197,94,0.15) 0%, rgba(22,163,74,0.06) 50%, rgba(21,128,61,0) 100%)",
     iconColor: "group-hover:text-green-500 dark:group-hover:text-green-400",
   },
+  {
+    icon: <Users className="h-5 w-5" />,
+    label: "Membres",
+    href: "/team-manager",
+    gradient: "radial-gradient(circle, rgba(147,51,234,0.15) 0%, rgba(126,34,206,0.06) 50%, rgba(107,33,168,0) 100%)",
+    iconColor: "group-hover:text-purple-500 dark:group-hover:text-purple-400",
+  },
 ];
 
 const UserItem: MenuItem =

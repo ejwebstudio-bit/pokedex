@@ -164,9 +164,9 @@ export async function removePokemonToTeam(req, res) {
       return res.status(404).json({ error: "Team not found" });
     }
 
-    // ✅ Vérifier AVANT d'ajouter
-    if (team.pokemons.length >= 5) {
-      return res.status(400).json({ error: "Team already has 5 Pokémon" });
+    // ✅ Vérifier qu'il y a des Pokémons à retirer
+    if (team.pokemons.length === 0) {
+      return res.status(400).json({ error: "Team has no Pokémon to remove" });
     }
 
     await team.removePokemon(pokemon);
